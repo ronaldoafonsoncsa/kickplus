@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KickPlus — Análise de Fundamentos</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <span class="logo">⚽ KickPlus</span>
+      <span class="tagline" data-i18n="tagline">Análise Técnica de Fundamentos</span>
+      <div class="lang-toggle">
+        <button class="lang-btn active" data-lang="pt">PT</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="upload-section card">
+      <h2 data-i18n="uploadTitle">Enviar Vídeo para Análise</h2>
+      <p class="subtitle" data-i18n="uploadSubtitle">Filme a execução do fundamento e envie para receber feedback técnico detalhado.</p>
+
+      <form id="analyzeForm">
+        <div class="field-group">
+          <label data-i18n="skillLabel">Fundamento praticado</label>
+          <div class="skill-selector">
+            <label class="skill-option">
+              <input type="radio" name="skill" value="shot" required />
+              <span class="skill-card">
+                <span class="skill-icon">🦵</span>
+                <span class="skill-name" data-i18n="skillShot">Chute</span>
+              </span>
+            </label>
+            <label class="skill-option">
+              <input type="radio" name="skill" value="pass" />
+              <span class="skill-card">
+                <span class="skill-icon">↗️</span>
+                <span class="skill-name" data-i18n="skillPass">Passe</span>
+              </span>
+            </label>
+            <label class="skill-option">
+              <input type="radio" name="skill" value="control" />
+              <span class="skill-card">
+                <span class="skill-icon">🎯</span>
+                <span class="skill-name" data-i18n="skillControl">Domínio</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label data-i18n="videoLabel">Vídeo do treino</label>
+          <div class="drop-zone" id="dropZone">
+            <input type="file" id="videoInput" name="video" accept="video/*" required />
+            <div class="drop-zone-content" id="dropZoneContent">
+              <span class="drop-icon">📹</span>
+              <span class="drop-text" data-i18n="dropText">Clique ou arraste o vídeo aqui</span>
+              <span class="drop-hint" data-i18n="dropHint">MP4, MOV, AVI, WebM — máx. 100MB</span>
+            </div>
+          </div>
+          <div id="videoPreviewContainer" class="video-preview-container hidden">
+            <video id="videoPreview" controls></video>
+            <button type="button" id="removeVideo" class="btn-remove" data-i18n="btnRemove">✕ Remover</button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary" id="submitBtn">
+          <span id="btnText" data-i18n="btnAnalyze">Analisar Vídeo</span>
+          <span id="btnLoader" class="hidden">
+            <span class="spinner"></span>
+            <span data-i18n="btnAnalyzing">Analisando...</span>
+          </span>
+        </button>
+      </form>
+    </section>
+
+    <section id="resultsSection" class="results-section hidden">
+      <div class="card result-header-card">
+        <div class="result-title-row">
+          <h2 data-i18n="resultsTitle">Resultado da Análise</h2>
+          <div class="score-badge" id="scoreBadge">
+            <span class="score-value" id="scoreValue">—</span>
+            <span class="score-label" data-i18n="scoreLabel">/ 10</span>
+          </div>
+        </div>
+        <p id="resultSummary" class="result-summary"></p>
+        <div class="main-tip-box">
+          <span class="main-tip-label" data-i18n="mainTipLabel">💡 Dica principal para o próximo treino</span>
+          <p id="mainTip"></p>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card positives-card">
+          <h3 data-i18n="positivesTitle">✅ Pontos Positivos</h3>
+          <ul id="positivesList"></ul>
+        </div>
+
+        <div class="card improvements-card">
+          <h3 data-i18n="improvementsTitle">🔧 Pontos a Melhorar</h3>
+          <div id="improvementsList"></div>
+        </div>
+      </div>
+
+      <div class="actions-row">
+        <button class="btn-secondary" id="newAnalysisBtn" data-i18n="btnNewAnalysis">Nova Análise</button>
+      </div>
+    </section>
+
+    <div id="errorBox" class="error-box hidden">
+      <span id="errorMessage"></span>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
