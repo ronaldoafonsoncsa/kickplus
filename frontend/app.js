@@ -1,6 +1,25 @@
+// Auth guard — redirect before rendering anything
+(function () {
+  if (!localStorage.getItem('kickplus-token')) {
+    window.location.replace('/login');
+  }
+})();
+
+const TOKEN_KEY = 'kickplus-token';
+
+function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+function logout() {
+  localStorage.removeItem(TOKEN_KEY);
+  window.location.replace('/login');
+}
+
 const translations = {
   pt: {
     pageTitle:      "KickPlus — Análise de Fundamentos",
+    btnLogout:      "Sair",
     tagline:        "Análise Técnica de Fundamentos",
     uploadTitle:    "Enviar Vídeo para Análise",
     uploadSubtitle: "Filme a execução do fundamento e envie para receber feedback técnico detalhado.",
@@ -28,6 +47,7 @@ const translations = {
   },
   en: {
     pageTitle:      "KickPlus — Fundamentals Analysis",
+    btnLogout:      "Sign out",
     tagline:        "Technical Fundamentals Analysis",
     uploadTitle:    "Submit Video for Analysis",
     uploadSubtitle: "Record the skill execution and submit to receive detailed technical feedback.",
@@ -149,7 +169,14 @@ form.addEventListener('submit', async (e) => {
   formData.append('language', currentLang);
 
   try {
-    const res = await fetch('/api/analyze', { method: 'POST', body: formData });
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${getToken()}` },
+      body: formData,
+    });
+
+    if (res.status === 401) { logout(); return; }
+
     const data = await res.json();
 
     if (!res.ok) {
@@ -205,6 +232,8 @@ function scoreToColor(score) {
   if (score >= 4) return '#c07010';
   return '#c03030';
 }
+
+document.getElementById('logoutBtn').addEventListener('click', logout);
 
 newAnalysisBtn.addEventListener('click', () => {
   resultsSection.classList.add('hidden');

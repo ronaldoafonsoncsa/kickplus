@@ -1,19 +1,22 @@
 import os
 import uuid
-import shutil
 from pathlib import Path
 
-from fastapi import FastAPI, File, Form, UploadFile, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
-
-from video_utils import extract_frames
-from analyzer import analyze_video_frames
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(dotenv_path=BASE_DIR / ".env")
+
+from fastapi import FastAPI, File, Form, UploadFile, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+
+from video_utils import extract_frames
+from analyzer import analyze_video_frames
+from auth import require_auth, create_token, ACCESS_PASSWORD
+
 UPLOADS_DIR = BASE_DIR / "uploads"
 FRONTEND_DIR = BASE_DIR / "frontend"
 UPLOADS_DIR.mkdir(exist_ok=True)
@@ -46,10 +49,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 ALLOWED_LANGUAGES = {"pt", "en"}
 
-@app.post("/api/analyze")
+
+class LoginRequest(BaseModel):
+    password: str
+
+
+@app.post("/api/auth/login")
+def login(body: LoginRequest):
+    if not ACCESS_PASSWORD:
+        raise HTTPException(status_code=500, detail="Server misconfigured: ACCESS_PASSWORD not set")
+    if body.password != ACCESS_PASSWORD:
+        raise HTTPException(status_code=401, detail="Senha incorreta.")
+    return {"token": create_token()}
+
+
+@app.post("/api/analyze", dependencies=[Depends(require_auth)])
 async def analyze(
     video: UploadFile = File(...),
     skill: str = Form(...),
@@ -88,6 +104,11 @@ async def analyze(
     finally:
         if video_path.exists():
             video_path.unlink()
+
+
+@app.get("/login")
+def serve_login():
+    return FileResponse(FRONTEND_DIR / "login.html")
 
 
 @app.get("/")
