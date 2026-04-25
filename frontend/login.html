@@ -121,7 +121,7 @@
         });
         const data = await res.json();
         if (!res.ok) {
-          errorBox.textContent = data.detail || T[lang].errWrong;
+          errorBox.textContent = res.status === 401 ? T[lang].errWrong : (data.detail || T[lang].errWrong);
           errorBox.classList.remove('hidden');
           return;
         }
