@@ -2,6 +2,7 @@ import anthropic
 import os
 import json
 import re
+from typing import Optional
 
 SKILL_LABELS = {
     "shot": "chute (finalização ou passe longo)",
@@ -51,7 +52,7 @@ Responda SOMENTE com um JSON válido, sem blocos de código markdown, exatamente
 }"""
 
 
-def _player_context(age: int | None, weight: float | None, height: float | None, dominant_foot: str | None) -> str:
+def _player_context(age: Optional[int], weight: Optional[float], height: Optional[float], dominant_foot: Optional[str]) -> str:
     parts = []
     if age is not None:
         parts.append(f"idade: {age} anos")
@@ -70,10 +71,10 @@ def analyze_video_frames(
     frames_b64: list[str],
     skill: str,
     language: str = "pt",
-    age: int | None = None,
-    weight: float | None = None,
-    height: float | None = None,
-    dominant_foot: str | None = None,
+    age: Optional[int] = None,
+    weight: Optional[float] = None,
+    height: Optional[float] = None,
+    dominant_foot: Optional[str] = None,
 ) -> dict:
     api_key = os.getenv("ANTHROPIC_API_KEY")
     if not api_key:
