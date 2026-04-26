@@ -51,7 +51,30 @@ Responda SOMENTE com um JSON válido, sem blocos de código markdown, exatamente
 }"""
 
 
-def analyze_video_frames(frames_b64: list[str], skill: str, language: str = "pt") -> dict:
+def _player_context(age: int | None, weight: float | None, height: float | None, dominant_foot: str | None) -> str:
+    parts = []
+    if age is not None:
+        parts.append(f"idade: {age} anos")
+    if dominant_foot:
+        parts.append(f"pé dominante: {dominant_foot}")
+    if height is not None:
+        parts.append(f"altura: {height} cm")
+    if weight is not None:
+        parts.append(f"peso: {weight} kg")
+    if not parts:
+        return ""
+    return "Informações do jogador: " + ", ".join(parts) + "."
+
+
+def analyze_video_frames(
+    frames_b64: list[str],
+    skill: str,
+    language: str = "pt",
+    age: int | None = None,
+    weight: float | None = None,
+    height: float | None = None,
+    dominant_foot: str | None = None,
+) -> dict:
     api_key = os.getenv("ANTHROPIC_API_KEY")
     if not api_key:
         raise ValueError("ANTHROPIC_API_KEY is not set.")
@@ -63,6 +86,7 @@ def analyze_video_frames(frames_b64: list[str], skill: str, language: str = "pt"
         if language == "en"
         else "Responda em Português Brasileiro. Todos os textos do JSON devem estar em Português."
     )
+    player_ctx = _player_context(age, weight, height, dominant_foot)
 
     content = [
         {
@@ -70,7 +94,8 @@ def analyze_video_frames(frames_b64: list[str], skill: str, language: str = "pt"
             "text": (
                 f"Analise estes {len(frames_b64)} frames sequenciais de um vídeo mostrando "
                 f"a execução do fundamento: **{skill_label}**.\n"
-                f"Os frames estão em ordem cronológica. Forneça o feedback técnico no formato JSON solicitado.\n"
+                + (f"{player_ctx}\n" if player_ctx else "")
+                + f"Os frames estão em ordem cronológica. Forneça o feedback técnico no formato JSON solicitado.\n"
                 f"{lang_instruction}"
             ),
         }

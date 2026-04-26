@@ -20,6 +20,15 @@ const translations = {
   pt: {
     pageTitle:      "KickPlus — Análise de Fundamentos",
     btnLogout:      "Sair",
+    profileTitle:   "Perfil do jogador",
+    profileOptional:"(opcional — melhora a análise)",
+    profileAge:     "Idade",
+    profileHeight:  "Altura (cm)",
+    profileWeight:  "Peso (kg)",
+    profileFoot:    "Pé dominante",
+    footRight:      "Direito",
+    footLeft:       "Esquerdo",
+    footBoth:       "Ambidestro",
     tagline:        "Análise Técnica de Fundamentos",
     uploadTitle:    "Enviar Vídeo para Análise",
     uploadSubtitle: "Filme a execução do fundamento e envie para receber feedback técnico detalhado.",
@@ -48,6 +57,15 @@ const translations = {
   en: {
     pageTitle:      "KickPlus — Fundamentals Analysis",
     btnLogout:      "Sign out",
+    profileTitle:   "Player profile",
+    profileOptional:"(optional — improves the analysis)",
+    profileAge:     "Age",
+    profileHeight:  "Height (cm)",
+    profileWeight:  "Weight (kg)",
+    profileFoot:    "Dominant foot",
+    footRight:      "Right",
+    footLeft:       "Left",
+    footBoth:       "Both feet",
     tagline:        "Technical Fundamentals Analysis",
     uploadTitle:    "Submit Video for Analysis",
     uploadSubtitle: "Record the skill execution and submit to receive detailed technical feedback.",
@@ -167,6 +185,15 @@ form.addEventListener('submit', async (e) => {
   formData.append('video', file);
   formData.append('skill', skill);
   formData.append('language', currentLang);
+
+  const age    = document.getElementById('playerAge').value;
+  const height = document.getElementById('playerHeight').value;
+  const weight = document.getElementById('playerWeight').value;
+  const foot   = form.querySelector('input[name="dominant_foot"]:checked')?.value;
+  if (age)    formData.append('age', age);
+  if (height) formData.append('height', height);
+  if (weight) formData.append('weight', weight);
+  if (foot)   formData.append('dominant_foot', foot);
 
   try {
     const res = await fetch('/api/analyze', {

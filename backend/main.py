@@ -70,6 +70,10 @@ async def analyze(
     video: UploadFile = File(...),
     skill: str = Form(...),
     language: str = Form(default="pt"),
+    age: int | None = Form(default=None),
+    weight: float | None = Form(default=None),
+    height: float | None = Form(default=None),
+    dominant_foot: str | None = Form(default=None),
 ):
     if language not in ALLOWED_LANGUAGES:
         language = "pt"
@@ -92,7 +96,10 @@ async def analyze(
             f.write(content)
 
         frames = extract_frames(str(video_path), num_frames=4)
-        result = analyze_video_frames(frames, skill, language)
+        result = analyze_video_frames(
+            frames, skill, language,
+            age=age, weight=weight, height=height, dominant_foot=dominant_foot,
+        )
         return {"success": True, "analysis": result}
 
     except HTTPException:
