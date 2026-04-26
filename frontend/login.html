@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KickPlus — Acesso</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <span class="logo">⚽ KickPlus</span>
+      <span class="tagline" data-i18n="tagline"></span>
+      <div class="lang-toggle">
+        <button class="lang-btn" data-lang="pt">PT</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="card login-card">
+      <h2 data-i18n="title"></h2>
+      <p class="subtitle" data-i18n="subtitle"></p>
+      <form id="loginForm">
+        <div class="field-group">
+          <label for="password" data-i18n="passwordLabel"></label>
+          <input
+            type="password"
+            id="password"
+            class="text-input"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+        <button type="submit" class="btn-primary" id="loginBtn">
+          <span id="loginBtnText" data-i18n="btnEnter"></span>
+          <span id="loginBtnLoader" class="hidden">
+            <span class="spinner"></span>
+          </span>
+        </button>
+      </form>
+      <div id="loginError" class="error-box hidden" style="margin-top: 14px;"></div>
+    </section>
+  </main>
+
+  <script>
+    if (localStorage.getItem('kickplus-token')) {
+      window.location.replace('/');
+    }
+
+    const T = {
+      pt: {
+        pageTitle:     'KickPlus — Acesso',
+        tagline:       'Análise Técnica de Fundamentos',
+        title:         'Acesso',
+        subtitle:      'Digite a senha para acessar o app.',
+        passwordLabel: 'Senha',
+        btnEnter:      'Entrar',
+        errWrong:      'Senha incorreta.',
+        errConnection: 'Erro de conexão. Verifique se o servidor está rodando.',
+      },
+      en: {
+        pageTitle:     'KickPlus — Sign in',
+        tagline:       'Technical Fundamentals Analysis',
+        title:         'Sign in',
+        subtitle:      'Enter the password to access the app.',
+        passwordLabel: 'Password',
+        btnEnter:      'Sign in',
+        errWrong:      'Wrong password.',
+        errConnection: 'Connection error. Make sure the server is running.',
+      },
+    };
+
+    let lang = localStorage.getItem('kickplus-lang')
+      || (navigator.language.startsWith('pt') ? 'pt' : 'en');
+
+    function applyTranslations() {
+      const t = T[lang];
+      document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
+      document.title = t.pageTitle;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        el.textContent = t[el.dataset.i18n] ?? el.dataset.i18n;
+      });
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+      });
+    }
+
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        lang = btn.dataset.lang;
+        localStorage.setItem('kickplus-lang', lang);
+        applyTranslations();
+      });
+    });
+
+    applyTranslations();
+
+    const form = document.getElementById('loginForm');
+    const btn = document.getElementById('loginBtn');
+    const btnText = document.getElementById('loginBtnText');
+    const btnLoader = document.getElementById('loginBtnLoader');
+    const errorBox = document.getElementById('loginError');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = document.getElementById('password').value;
+
+      btn.disabled = true;
+      btnText.classList.add('hidden');
+      btnLoader.classList.remove('hidden');
+      errorBox.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          errorBox.textContent = res.status === 401 ? T[lang].errWrong : (data.detail || T[lang].errWrong);
+          errorBox.classList.remove('hidden');
+          return;
+        }
+        localStorage.setItem('kickplus-token', data.token);
+        window.location.replace('/');
+      } catch {
+        errorBox.textContent = T[lang].errConnection;
+        errorBox.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btnText.classList.remove('hidden');
+        btnLoader.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
