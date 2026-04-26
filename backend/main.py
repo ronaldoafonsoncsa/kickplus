@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(dotenv_path=BASE_DIR / ".env")
 
+from typing import Optional
 from fastapi import FastAPI, File, Form, UploadFile, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -70,6 +71,10 @@ async def analyze(
     video: UploadFile = File(...),
     skill: str = Form(...),
     language: str = Form(default="pt"),
+    age: Optional[int] = Form(default=None),
+    weight: Optional[float] = Form(default=None),
+    height: Optional[float] = Form(default=None),
+    dominant_foot: Optional[str] = Form(default=None),
 ):
     if language not in ALLOWED_LANGUAGES:
         language = "pt"
@@ -92,7 +97,10 @@ async def analyze(
             f.write(content)
 
         frames = extract_frames(str(video_path), num_frames=4)
-        result = analyze_video_frames(frames, skill, language)
+        result = analyze_video_frames(
+            frames, skill, language,
+            age=age, weight=weight, height=height, dominant_foot=dominant_foot,
+        )
         return {"success": True, "analysis": result}
 
     except HTTPException:
